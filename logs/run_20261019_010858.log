@@ -1,0 +1,11 @@
+== [1/4] Gate: validating Stage 1 (chat) output: handoff/spec.json
+SPEC OK: 6 fields, 2 cross-field rules, 27 examples
+== [2/4] Generating independent acceptance tests from the spec
+Wrote generated/test_acceptance.py with 27 acceptance tests
+== [3/4] Stage 2 skipped (AI_CLI not set): replaying committed generated/validator.py
+== [4/4] Running acceptance + unit tests
+............................................                             [100%]
+44 passed in 0.03s
+== Demo: validating a sample registration
+promo_code.not_allowed_for_vip: VIP tickets cannot use a promo code.
+== PIPELINE PASSED. Log: logs/run_20261019_010858.log

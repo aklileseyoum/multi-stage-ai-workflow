@@ -1,0 +1,3 @@
+SPEC REJECTED. Paste these back into the chat AI to fix:
+  - Example 'valid standard' uses unknown codes ['email.bogus']
+  - Codes never exercised by an example: ['promo_code.not_allowed_for_vip']

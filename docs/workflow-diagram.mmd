@@ -1,0 +1,18 @@
+flowchart LR
+    A["📝 Raw requirements<br/>input/requirements.md"] --> B
+    subgraph S1["STAGE 1 · Chat UX (any chat AI)"]
+      B["Chat AI<br/>+ prompts/stage1_chat_prompt.md"]
+    end
+    B -->|"JSON reply saved as"| C[("handoff/spec.json<br/>(the contract)")]
+    C --> G{"Gate<br/>tools/validate_spec.py<br/>schema + consistency"}
+    G -->|"❌ errors"| B
+    G -->|"✅ OK"| T["tools/gen_acceptance_tests.py<br/>spec examples → test_acceptance.py"]
+    G -->|"✅ OK"| D
+    subgraph S2["STAGE 2 · CLI / IDE agent UX (any coding agent)"]
+      D["CLI AI agent ($AI_CLI)<br/>+ prompts/stage2_cli_prompt.md"]
+    end
+    D --> E["generated/validator.py<br/>generated/test_validator.py"]
+    T --> F
+    E --> F{"pytest<br/>acceptance + unit"}
+    F -->|"❌ failures"| D
+    F -->|"✅ pass"| H["✅ Tested validator<br/>ready to integrate"]

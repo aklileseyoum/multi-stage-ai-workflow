@@ -1,0 +1,86 @@
+{
+  "spec_version": "1.0",
+  "name": "event_registration_validator",
+  "description": "Validates a tech-conference registration form and reports every problem at once.",
+  "fields": [
+    {
+      "name": "full_name", "type": "string", "required": true,
+      "rules": [
+        { "code": "full_name.required", "kind": "required", "params": {}, "message": "Full name is required." },
+        { "code": "full_name.type", "kind": "type", "params": {}, "message": "Full name must be text." },
+        { "code": "full_name.length", "kind": "length", "params": { "min": 2, "max": 60 }, "message": "Full name must be 2-60 characters." }
+      ]
+    },
+    {
+      "name": "email", "type": "string", "required": true,
+      "rules": [
+        { "code": "email.required", "kind": "required", "params": {}, "message": "Email is required." },
+        { "code": "email.type", "kind": "type", "params": {}, "message": "Email must be text." },
+        { "code": "email.format", "kind": "pattern", "params": { "regex": "[^@\\s]+@[^@\\s]+\\.[A-Za-z]{2,}" }, "message": "Email must be a valid address." }
+      ]
+    },
+    {
+      "name": "age", "type": "integer", "required": true,
+      "rules": [
+        { "code": "age.required", "kind": "required", "params": {}, "message": "Age is required." },
+        { "code": "age.type", "kind": "type", "params": {}, "message": "Age must be a whole number." },
+        { "code": "age.range", "kind": "range", "params": { "min": 16, "max": 120 }, "message": "Age must be between 16 and 120." }
+      ]
+    },
+    {
+      "name": "ticket_type", "type": "string", "required": true,
+      "rules": [
+        { "code": "ticket_type.required", "kind": "required", "params": {}, "message": "Ticket type is required." },
+        { "code": "ticket_type.type", "kind": "type", "params": {}, "message": "Ticket type must be text." },
+        { "code": "ticket_type.enum", "kind": "enum", "params": { "values": ["standard", "vip", "student"] }, "message": "Ticket type must be standard, vip or student." }
+      ]
+    },
+    {
+      "name": "student_id", "type": "string", "required": false,
+      "rules": [
+        { "code": "student_id.type", "kind": "type", "params": {}, "message": "Student ID must be text." },
+        { "code": "student_id.format", "kind": "pattern", "params": { "regex": "STU\\d{6}" }, "message": "Student ID must be STU followed by 6 digits." }
+      ]
+    },
+    {
+      "name": "promo_code", "type": "string", "required": false,
+      "rules": [
+        { "code": "promo_code.type", "kind": "type", "params": {}, "message": "Promo code must be text." },
+        { "code": "promo_code.format", "kind": "pattern", "params": { "regex": "[A-Z0-9]{5,10}" }, "message": "Promo code must be 5-10 uppercase letters or digits." }
+      ]
+    }
+  ],
+  "cross_field_rules": [
+    { "code": "student_id.required_for_student", "description": "If ticket_type is 'student', student_id must be present.", "message": "Student tickets require a student ID." },
+    { "code": "promo_code.not_allowed_for_vip", "description": "If ticket_type is 'vip', promo_code must not be present.", "message": "VIP tickets cannot use a promo code." }
+  ],
+  "examples": [
+    { "name": "valid standard", "input": { "full_name": "Abebe Kebede", "email": "abebe@example.com", "age": 28, "ticket_type": "standard" }, "expected_errors": [] },
+    { "name": "valid student", "input": { "full_name": "Sara Ali", "email": "sara@uni.edu", "age": 19, "ticket_type": "student", "student_id": "STU123456" }, "expected_errors": [] },
+    { "name": "valid standard with promo", "input": { "full_name": "Jo", "email": "jo@x.io", "age": 16, "ticket_type": "standard", "promo_code": "EARLY2026" }, "expected_errors": [] },
+    { "name": "valid vip at max age", "input": { "full_name": "Old Timer", "email": "ot@example.org", "age": 120, "ticket_type": "vip" }, "expected_errors": [] },
+    { "name": "missing full name", "input": { "email": "a@b.com", "age": 30, "ticket_type": "standard" }, "expected_errors": ["full_name.required"] },
+    { "name": "full name wrong type", "input": { "full_name": 42, "email": "a@b.com", "age": 30, "ticket_type": "standard" }, "expected_errors": ["full_name.type"] },
+    { "name": "full name too short", "input": { "full_name": "A", "email": "a@b.com", "age": 30, "ticket_type": "standard" }, "expected_errors": ["full_name.length"] },
+    { "name": "full name too long", "input": { "full_name": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "email": "a@b.com", "age": 30, "ticket_type": "standard" }, "expected_errors": ["full_name.length"] },
+    { "name": "missing email", "input": { "full_name": "Abebe", "age": 30, "ticket_type": "standard" }, "expected_errors": ["email.required"] },
+    { "name": "email wrong type", "input": { "full_name": "Abebe", "email": ["a@b.com"], "age": 30, "ticket_type": "standard" }, "expected_errors": ["email.type"] },
+    { "name": "bad email", "input": { "full_name": "Abebe", "email": "not-an-email", "age": 30, "ticket_type": "standard" }, "expected_errors": ["email.format"] },
+    { "name": "missing age", "input": { "full_name": "Abebe", "email": "a@b.com", "ticket_type": "standard" }, "expected_errors": ["age.required"] },
+    { "name": "age as string", "input": { "full_name": "Abebe", "email": "a@b.com", "age": "30", "ticket_type": "standard" }, "expected_errors": ["age.type"] },
+    { "name": "age as float", "input": { "full_name": "Abebe", "email": "a@b.com", "age": 30.5, "ticket_type": "standard" }, "expected_errors": ["age.type"] },
+    { "name": "age as boolean", "input": { "full_name": "Abebe", "email": "a@b.com", "age": true, "ticket_type": "standard" }, "expected_errors": ["age.type"] },
+    { "name": "too young", "input": { "full_name": "Kid", "email": "kid@b.com", "age": 15, "ticket_type": "standard" }, "expected_errors": ["age.range"] },
+    { "name": "too old", "input": { "full_name": "Ancient", "email": "x@b.com", "age": 121, "ticket_type": "standard" }, "expected_errors": ["age.range"] },
+    { "name": "missing ticket type", "input": { "full_name": "Abebe", "email": "a@b.com", "age": 30 }, "expected_errors": ["ticket_type.required"] },
+    { "name": "ticket type wrong type", "input": { "full_name": "Abebe", "email": "a@b.com", "age": 30, "ticket_type": 1 }, "expected_errors": ["ticket_type.type"] },
+    { "name": "unknown ticket type", "input": { "full_name": "Abebe", "email": "a@b.com", "age": 30, "ticket_type": "platinum" }, "expected_errors": ["ticket_type.enum"] },
+    { "name": "student without id", "input": { "full_name": "Sara", "email": "s@u.edu", "age": 20, "ticket_type": "student" }, "expected_errors": ["student_id.required_for_student"] },
+    { "name": "bad student id", "input": { "full_name": "Sara", "email": "s@u.edu", "age": 20, "ticket_type": "student", "student_id": "STU12" }, "expected_errors": ["student_id.format"] },
+    { "name": "student id wrong type", "input": { "full_name": "Sara", "email": "s@u.edu", "age": 20, "ticket_type": "student", "student_id": 123456 }, "expected_errors": ["student_id.type"] },
+    { "name": "lowercase promo", "input": { "full_name": "Abebe", "email": "a@b.com", "age": 30, "ticket_type": "standard", "promo_code": "early" }, "expected_errors": ["promo_code.format"] },
+    { "name": "promo wrong type", "input": { "full_name": "Abebe", "email": "a@b.com", "age": 30, "ticket_type": "standard", "promo_code": 12345 }, "expected_errors": ["promo_code.type"] },
+    { "name": "vip with promo", "input": { "full_name": "Big Spender", "email": "b@s.com", "age": 40, "ticket_type": "vip", "promo_code": "SAVE10" }, "expected_errors": ["promo_code.not_allowed_for_vip"] },
+    { "name": "many errors at once", "input": { "full_name": "", "email": "bad", "age": 10, "ticket_type": "student", "promo_code": "x" }, "expected_errors": ["age.range", "email.format", "full_name.length", "promo_code.format", "student_id.required_for_student"] }
+  ]
+}
